@@ -1,6 +1,6 @@
 pub mod parser;
 
-use std::net::Ipv4Addr;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 use pnet::{packet::{ethernet::{EtherType}, ip::IpNextHeaderProtocol}, util::MacAddr};
 
@@ -23,15 +23,22 @@ pub struct ParsedEthernet {
 
 #[derive(Debug)]
 pub enum ParsedIp {
+    Unknown,
     V4 {
         src: Ipv4Addr,
         dest: Ipv4Addr,
+        proto: IpNextHeaderProtocol,
+    },
+    V6 {
+        src: Ipv6Addr,
+        dest: Ipv6Addr,
         proto: IpNextHeaderProtocol,
     },
 }
 
 #[derive(Debug)]
 pub enum ParsedTransport {
+    Unknown,
     Tcp {
         src_port: u16,
         dest_port: u16,
