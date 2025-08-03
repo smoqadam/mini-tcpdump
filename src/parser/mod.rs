@@ -3,10 +3,11 @@ pub mod ip;
 pub mod protocol;
 
 use std::net::{ IpAddr, Ipv4Addr, Ipv6Addr };
+use serde::{ Serialize  ,Serializer};
 
 use pnet::{ packet::{ ethernet::{ EtherType }, ip::IpNextHeaderProtocol }, util::MacAddr };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ParsedPacket {
     pub ethernet: ParsedEthernet,
     pub network: Option<ParsedNetwork>,
@@ -14,20 +15,32 @@ pub struct ParsedPacket {
     // pub application: Option<ParsedApplication>, // todo later
 }
 
-#[derive(Debug, Clone)]
-pub struct ParsedEthernet {
-    pub src_mac: MacAddr,
-    pub dest_mac: MacAddr,
-    pub ether_type: EtherType,
+
+
+fn mac_serialize<S>(x: &MacAddr, s: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    s.serialize_str(format!("{}", x).as_str())
 }
 
-#[derive(Debug, Clone)]
+
+#[derive(Debug, Clone, Serialize)]
+pub struct ParsedEthernet {
+    #[serde(serialize_with = "mac_serialize")]
+    pub src_mac: MacAddr,
+    #[serde(serialize_with = "mac_serialize")]
+    pub dest_mac: MacAddr,
+    // pub ether_type: EtherType,
+}
+
+
+#[derive(Debug, Clone, Serialize)]
 pub enum ParsedNetwork {
     Ipv4(Ipv4Info),
     Ipv6(Ipv6Info),
     Unknown,
 }
-
 
 impl ParsedNetwork {
     pub fn src_host(&self) -> Option<IpAddr> {
@@ -47,35 +60,34 @@ impl ParsedNetwork {
     }
 }
 
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Ipv6Info {
-    src: Ipv6Addr,
-    dest: Ipv6Addr,
-    proto: IpNextHeaderProtocol,
+    pub src: Ipv6Addr,
+    pub dest: Ipv6Addr,
+    // proto: IpNextHeaderProtocol,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Ipv4Info {
-    src: Ipv4Addr,
-    dest: Ipv4Addr,
-    proto: IpNextHeaderProtocol,
+    pub src: Ipv4Addr,
+    pub dest: Ipv4Addr,
+    // proto: IpNextHeaderProtocol,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum ParsedTransport {
     Tcp(TcpInfo),
     Udp(UdpInfo),
     Unknown,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct TcpInfo {
     pub src_port: u16,
     pub dest_port: u16,
     pub payload: Vec<u8>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct UdpInfo {
     pub src_port: u16,
     pub dest_port: u16,
@@ -87,7 +99,6 @@ pub trait HasPorts {
     fn dst_port(&self) -> u16;
 }
 
-
 impl HasPorts for TcpInfo {
     fn src_port(&self) -> u16 {
         self.src_port
@@ -97,7 +108,6 @@ impl HasPorts for TcpInfo {
     }
 }
 
-
 impl HasPorts for UdpInfo {
     fn src_port(&self) -> u16 {
         self.src_port
@@ -106,8 +116,6 @@ impl HasPorts for UdpInfo {
         self.dest_port
     }
 }
-
-
 
 impl ParsedTransport {
     pub fn src_port(&self) -> Option<u16> {

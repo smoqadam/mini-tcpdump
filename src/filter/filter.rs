@@ -1,8 +1,10 @@
 use std::net::IpAddr;
 
 use crate::{ parser::{ ParsedPacket, HasPorts }, ParsedTransport, Args };
+use serde::{Serialize};
 
-#[derive(Debug)]
+
+#[derive(Debug, Serialize)]
 pub struct PacketFilter {
     pub protocol: Option<Protocol>,
     pub src_port: Option<u16>,
@@ -11,7 +13,7 @@ pub struct PacketFilter {
     pub dest_host: Option<IpAddr>,
 }
 
-#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, clap::ValueEnum, Serialize)]
 pub enum Protocol {
     Tcp,
     Udp,
