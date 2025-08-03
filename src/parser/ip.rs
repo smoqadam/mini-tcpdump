@@ -9,6 +9,7 @@ use crate::parser::protocol::{parse_tcp, parse_udp};
 pub fn parse_ipv6(ipv6: Ipv6Packet) -> Option<ParsedTransport> {
     let transport = match ipv6.get_next_header() {
         IpNextHeaderProtocols::Tcp => parse_tcp(ipv6.payload()),
+        IpNextHeaderProtocols::Udp => parse_udp(ipv6.payload()),
         _ => { Some(ParsedTransport::Unknown) }
     };
     transport

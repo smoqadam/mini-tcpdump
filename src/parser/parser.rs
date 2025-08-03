@@ -3,9 +3,7 @@ use pnet::{packet::{
     ipv4::Ipv4Packet,
     ipv6::Ipv6Packet,
     Packet,
-}, util::MacAddr};
-use serde::Serializer;
-
+}};
 use crate::parser::{
     Ipv4Info,
     Ipv6Info,
@@ -24,7 +22,7 @@ pub fn parse(packet: &[u8]) -> Option<ParsedPacket> {
         // ether_type: eth_packet.get_ethertype(),
     };
 
-    let mut network = None;
+    let mut network = Some(ParsedNetwork::Unknown);
 
     let transport = match eth_packet.get_ethertype() {
         EtherTypes::Ipv4 => {

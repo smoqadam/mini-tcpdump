@@ -3,9 +3,9 @@ pub mod ip;
 pub mod protocol;
 
 use std::net::{ IpAddr, Ipv4Addr, Ipv6Addr };
-use serde::{ Serialize  ,Serializer};
+use serde::{ Serialize, Serializer };
 
-use pnet::{ packet::{ ethernet::{ EtherType }, ip::IpNextHeaderProtocol }, util::MacAddr };
+use pnet::{ util::MacAddr };
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ParsedPacket {
@@ -15,15 +15,9 @@ pub struct ParsedPacket {
     // pub application: Option<ParsedApplication>, // todo later
 }
 
-
-
-fn mac_serialize<S>(x: &MacAddr, s: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
+fn mac_serialize<S>(x: &MacAddr, s: S) -> Result<S::Ok, S::Error> where S: Serializer {
     s.serialize_str(format!("{}", x).as_str())
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ParsedEthernet {
@@ -33,7 +27,6 @@ pub struct ParsedEthernet {
     pub dest_mac: MacAddr,
     // pub ether_type: EtherType,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub enum ParsedNetwork {

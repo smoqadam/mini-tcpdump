@@ -1,6 +1,6 @@
 use std::net::IpAddr;
 
-use crate::{ parser::{ ParsedPacket, HasPorts }, ParsedTransport, Args };
+use crate::{ parser::{ ParsedPacket}, ParsedTransport, Args };
 use serde::{Serialize};
 
 
@@ -31,17 +31,17 @@ impl PacketFilter {
         }
     }
 
-    pub fn matches(&self, packet: ParsedPacket) -> bool {
+    pub fn matches(&self, packet: &ParsedPacket) -> bool {
         return 
-            self.match_protocol(packet.clone()) &&
-            self.match_dest_port(packet.clone()) &&
-            self.match_dst_host(packet.clone()) &&
-            self.match_src_host(packet.clone()) &&
+            self.match_protocol(packet) &&
+            self.match_dest_port(packet) &&
+            self.match_dst_host(packet) &&
+            self.match_src_host(packet) &&
             self.match_src_port(packet)
         ;
     }
 
-    fn match_protocol(&self, packet: ParsedPacket) -> bool {
+    fn match_protocol(&self, packet: &ParsedPacket) -> bool {
         match self.protocol {
             Some(Protocol::Tcp) => matches!(packet.transport, Some(ParsedTransport::Tcp(..))),
             Some(Protocol::Udp) => matches!(packet.transport, Some(ParsedTransport::Udp(..))),
@@ -50,37 +50,37 @@ impl PacketFilter {
         }
     }
 
-    fn match_dest_port(&self, packet: ParsedPacket) -> bool {
+    fn match_dest_port(&self, packet: &ParsedPacket) -> bool {
         match self.dest_port {
             Some(port) => {
-                if let Some(t) = packet.transport { t.dst_port() == Some(port) } else { false }
+                if let Some(t) = &packet.transport { t.dst_port() == Some(port) } else { false }
             }
             None => true,
         }
     }
 
-    fn match_src_port(&self, packet: ParsedPacket) -> bool {
+    fn match_src_port(&self, packet: &ParsedPacket) -> bool {
         match self.src_port {
             Some(port) => {
-                if let Some(t) = packet.transport { t.src_port() == Some(port) } else { false }
+                if let Some(t) = &packet.transport { t.src_port() == Some(port) } else { false }
             }
             None => true,
         }
     }
 
-    fn match_src_host(&self, packet: ParsedPacket) -> bool {
+    fn match_src_host(&self, packet: &ParsedPacket) -> bool {
         match self.src_host {
             Some(ip) => {
-                if let Some(t) = packet.network { t.src_host() == Some(ip) } else { false }
+                if let Some(t) = &packet.network { t.src_host() == Some(ip) } else { false }
             }
             None => true,
         }
     }
 
-    fn match_dst_host(&self, packet: ParsedPacket) -> bool {
+    fn match_dst_host(&self, packet: &ParsedPacket) -> bool {
         match self.dest_host {
             Some(ip) => {
-                if let Some(t) = packet.network { t.dst_host() == Some(ip) } else { false }
+                if let Some(t) = &packet.network { t.dst_host() == Some(ip) } else { false }
             }
             None => true,
         }

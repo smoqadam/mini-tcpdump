@@ -45,7 +45,7 @@ fn main() -> Result<(), std::io::Error> {
     let packet_filter = PacketFilter::from_args(&args);
 
     let callback = Box::new(move |network_packet: parser::ParsedPacket| {
-        if packet_filter.matches(network_packet.clone()) {
+        if packet_filter.matches(&network_packet) {
 
             match args.format {
                 Some(OutputFormat::Json) => {
@@ -54,10 +54,10 @@ fn main() -> Result<(), std::io::Error> {
                 Some(OutputFormat::Compact) => {
                     println!("{}", formatter::compact::Compact::print(network_packet));
                 },
-                _ => {}
+                _ => {println!("{}", formatter::compact::Compact::print(network_packet));}
             }
         }
     });
-    sniffer::sniff(args.interface, callback);
+    sniffer::sniff(args.interface, callback)?;
     Ok(())
 }
