@@ -1,4 +1,7 @@
 pub mod parser;
+pub mod ip;
+pub mod protocol;
+
 
 use std::net::{Ipv4Addr, Ipv6Addr};
 

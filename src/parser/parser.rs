@@ -1,14 +1,12 @@
 use pnet::packet::{
     ethernet::{ EtherTypes, EthernetPacket },
-    ip::IpNextHeaderProtocols,
     ipv4::Ipv4Packet,
     ipv6::Ipv6Packet,
-    tcp::TcpPacket,
     Packet,
 };
 
 use crate::parser::{ ParsedEthernet, ParsedIp, ParsedTransport, ParsedPacket };
-
+use crate::parser::ip::{ parse_ipv4, parse_ipv6 };
 pub fn parse(packet: &[u8]) -> Option<ParsedPacket> {
     let eth_packet = EthernetPacket::new(packet)?;
 
@@ -47,30 +45,4 @@ pub fn parse(packet: &[u8]) -> Option<ParsedPacket> {
         ip,
         transport,
     })
-}
-
-fn parse_ipv4(ipv4: Ipv4Packet) -> Option<ParsedTransport> {
-    let transport = match ipv4.get_next_level_protocol() {
-        IpNextHeaderProtocols::Tcp => parse_tcp(ipv4.payload()),
-        _ => { Some(ParsedTransport::Unknown) }
-    };
-
-    transport
-}
-
-fn parse_tcp(packet: &[u8]) -> Option<ParsedTransport> {
-    let tcp = TcpPacket::new(packet)?;
-    Some(ParsedTransport::Tcp {
-        src_port: tcp.get_source(),
-        dest_port: tcp.get_destination(),
-        payload: tcp.payload().to_vec(),
-    })
-}
-
-fn parse_ipv6(ipv6: Ipv6Packet) -> Option<ParsedTransport> {
-    let transport = match ipv6.get_next_header() {
-        IpNextHeaderProtocols::Tcp => parse_tcp(ipv6.payload()),
-        _ => { Some(ParsedTransport::Unknown) }
-    };
-    transport
 }
