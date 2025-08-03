@@ -24,7 +24,10 @@ struct Args {
 
     #[arg[long = "dst-port"]]
     dest_port: Option<u16>,
+
+    #[arg[long = "src-host"]]
     src_host: Option<IpAddr>,
+    #[arg[long = "dst-host"]]
     dest_host: Option<IpAddr>,
 }
 
@@ -33,12 +36,12 @@ fn main() -> Result<(), std::io::Error> {
     let packet_filter = PacketFilter::from_args(&args);
 
     println!("{:?}", packet_filter);
-    
+
     let callback = Box::new(move |network_packet: parser::ParsedPacket| {
         // let ParsedPacket { ethernet, ip, transport } = network_packet;
 
         if packet_filter.matches(network_packet.clone()) {
-            println!("(packet: {:?})", &network_packet.transport);
+            println!("(packet: {:?})", &network_packet);
         }
 
         // println!(

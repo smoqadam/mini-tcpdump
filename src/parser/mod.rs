@@ -2,7 +2,7 @@ pub mod parser;
 pub mod ip;
 pub mod protocol;
 
-use std::net::{ Ipv4Addr, Ipv6Addr };
+use std::net::{ IpAddr, Ipv4Addr, Ipv6Addr };
 
 use pnet::{ packet::{ ethernet::{ EtherType }, ip::IpNextHeaderProtocol }, util::MacAddr };
 
@@ -27,6 +27,26 @@ pub enum ParsedNetwork {
     Ipv6(Ipv6Info),
     Unknown,
 }
+
+
+impl ParsedNetwork {
+    pub fn src_host(&self) -> Option<IpAddr> {
+        match self {
+            ParsedNetwork::Ipv4(ip) => Some(IpAddr::V4(ip.src)),
+            ParsedNetwork::Ipv6(ip) => Some(IpAddr::V6(ip.src)),
+            ParsedNetwork::Unknown => None,
+        }
+    }
+
+    pub fn dst_host(&self) -> Option<IpAddr> {
+        match self {
+            ParsedNetwork::Ipv4(ip) => Some(IpAddr::V4(ip.dest)),
+            ParsedNetwork::Ipv6(ip) => Some(IpAddr::V6(ip.dest)),
+            ParsedNetwork::Unknown => None,
+        }
+    }
+}
+
 
 #[derive(Debug, Clone)]
 pub struct Ipv6Info {
@@ -67,6 +87,7 @@ pub trait HasPorts {
     fn dst_port(&self) -> u16;
 }
 
+
 impl HasPorts for TcpInfo {
     fn src_port(&self) -> u16 {
         self.src_port
@@ -85,6 +106,7 @@ impl HasPorts for UdpInfo {
         self.dest_port
     }
 }
+
 
 
 impl ParsedTransport {
